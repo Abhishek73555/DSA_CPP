@@ -16,6 +16,5 @@ int main(){
         st.push({arr[i],span});
         cout<<span<<" ";
     }
-
     return 0;
 }
