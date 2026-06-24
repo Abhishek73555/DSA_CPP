@@ -1,1 +1,98 @@
+/*
+ * Input: head = [1, 2, 3, 3, 4, 4, 5]
+ * Output: [1, 2, 5]
+ * 
+ * Console Visual Output:
+ * Original List: 1 -> 2 -> 3 -> 3 -> 4 -> 4 -> 5 -> nullptr
+ * Modified List: 1 -> 2 -> 5 -> nullptr
+ */
 
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// Definition for singly-linked list.
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+
+int main() {
+    // 1. Initialize input data
+    vector<int> values = {1, 2, 3, 3, 4, 4, 5};
+    
+    // 2. Build the linked list
+    ListNode* head = nullptr;
+    if (!values.empty()) {
+        head = new ListNode(values[0]);
+        ListNode* current = head;
+        for (size_t i = 1; i < values.size(); ++i) {
+            current->next = new ListNode(values[i]);
+            current = current->next;
+        }
+    }
+
+    // 3. Print original list
+    cout << "Original List: ";
+    ListNode* printPtr = head;
+    while (printPtr) {
+        cout << printPtr->val;
+        if (printPtr->next) cout << " -> ";
+        printPtr = printPtr->next;
+    }
+    cout << " -> nullptr\n";
+
+    // 4. Core Logic: Remove ALL instances of duplicate numbers
+    // Create a dummy node pointing to the head to easily handle head deletions
+    ListNode* dummy = new ListNode(0, head);
+    ListNode* prev = dummy; // Track the last distinct node before duplicate sublist
+    
+    while (head) {
+        // If a duplicate sequence is detected
+        if (head->next && head->val == head->next->val) {
+            // Find the last node of the duplicate sequence
+            while (head->next && head->val == head->next->val) {
+                ListNode* duplicate = head;
+                head = head->next;
+                delete duplicate; // Free memory of duplicate nodes
+            }
+            // 'head' is currently pointing to the last duplicate node.
+            // Move it forward to the first non-duplicate candidate and link prev
+            ListNode* lastDuplicate = head;
+            head = head->next; 
+            prev->next = head;
+            delete lastDuplicate; // Free the last duplicate node
+        } else {
+            // No duplicate sequence detected, safe to advance prev
+            prev = head;
+            head = head->next;
+        }
+    }
+    
+    // The actual head might have shifted, retrieve it from dummy->next
+    head = dummy->next;
+    delete dummy; // Clean up the placeholder node
+
+    // 5. Print modified list
+    cout << "Modified List: ";
+    printPtr = head;
+    while (printPtr) {
+        cout << printPtr->val;
+        if (printPtr->next) cout << " -> ";
+        printPtr = printPtr->next;
+    }
+    cout << " -> nullptr\n";
+
+    // 6. Free remaining allocated memory to prevent leaks
+    while (head) {
+        ListNode* cleanupPtr = head;
+        head = head->next;
+        delete cleanupPtr;
+    }
+
+    return 0;
+}
